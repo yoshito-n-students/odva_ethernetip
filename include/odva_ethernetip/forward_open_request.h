@@ -92,7 +92,7 @@ public:
   static EIP_WORD calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority,
     EIP_BYTE type, bool shared)
   {
-    return (size & 0x7F) | (variable ? 0x01 : 0) << 9 | (priority & 0x03) << 10
+    return (size & 0x1FF) | (variable ? 0x01 : 0) << 9 | (priority & 0x03) << 10
       | (type & 0x03) << 13 | (shared ? 0x01 : 0) << 15;
   }
 
