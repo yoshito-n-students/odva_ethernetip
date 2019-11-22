@@ -304,7 +304,7 @@ int Session::createConnection(const EIP_CONNECTION_INFO_T& o_to_t,
   conn.t_to_o_connection_id = next_connection_id_++;
 
   shared_ptr<ForwardOpenRequest> req = conn.createForwardOpenRequest();
-  RRDataResponse resp_data = sendRRDataCommand(0x5B, Path(0x06, 1), req);
+  RRDataResponse resp_data = sendRRDataCommand(0x54, Path(0x06, 1), req);
   ForwardOpenSuccess result;
   resp_data.getResponseDataAs(result);
   if (!conn.verifyForwardOpenResult(result))

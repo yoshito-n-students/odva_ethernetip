@@ -76,9 +76,9 @@ public:
   EIP_UDINT originator_sn;
   EIP_USINT timeout_multiplyer;
   EIP_UDINT o_to_t_rpi;
-  EIP_DWORD o_to_t_conn_params;
+  EIP_WORD o_to_t_conn_params;
   EIP_UDINT t_to_o_rpi;
-  EIP_DWORD t_to_o_conn_params;
+  EIP_WORD t_to_o_conn_params;
   EIP_BYTE conn_type;
 
   /**
@@ -89,11 +89,11 @@ public:
    * @param type Connection type / class info
    * @param shared If set to true, then a shared connection
    */
-  static EIP_DWORD calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority,
+  static EIP_WORD calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority,
     EIP_BYTE type, bool shared)
   {
-    return (size & 0x7FFF) | (variable ? 0x2000000 : 0) | (priority & 0x03) << 26
-      | (type & 0x03) << 29 | (shared ? 0x80000000 : 0);
+    return (size & 0x7F) | (variable ? 0x01 : 0) << 9 | (priority & 0x03) << 10
+      | (type & 0x03) << 13 | (shared ? 0x01 : 0) << 15;
   }
 
   /**
