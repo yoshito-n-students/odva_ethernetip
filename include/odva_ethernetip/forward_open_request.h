@@ -63,7 +63,8 @@ typedef enum
  * Class to encapsulate a ForwardOpenRequest data. Note that this is currently
  * only LARGE forward open, but could be easily changed to support both.
  */
-class ForwardOpenRequest : public Serializable
+template< typename ConnParamsType >
+class ForwardOpenRequest_ : public Serializable
 {
 public:
 
@@ -76,9 +77,9 @@ public:
   EIP_UDINT originator_sn;
   EIP_USINT timeout_multiplyer;
   EIP_UDINT o_to_t_rpi;
-  EIP_WORD o_to_t_conn_params;
+  ConnParamsType o_to_t_conn_params;
   EIP_UDINT t_to_o_rpi;
-  EIP_WORD t_to_o_conn_params;
+  ConnParamsType t_to_o_conn_params;
   EIP_BYTE conn_type;
 
   /**
@@ -89,12 +90,8 @@ public:
    * @param type Connection type / class info
    * @param shared If set to true, then a shared connection
    */
-  static EIP_WORD calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority,
-    EIP_BYTE type, bool shared)
-  {
-    return (size & 0x1FF) | (variable ? 0x01 : 0) << 9 | (priority & 0x03) << 10
-      | (type & 0x03) << 13 | (shared ? 0x01 : 0) << 15;
-  }
+  static ConnParamsType calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority,
+    EIP_BYTE type, bool shared);
 
   /**
    * Shortcut to set the origin to target parameters.
@@ -196,6 +193,27 @@ public:
 private:
   Path path_;
 };
+
+// For regular ForwardOpen
+template<>
+inline EIP_WORD ForwardOpenRequest_<EIP_WORD>::calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority, EIP_BYTE type, bool shared)  {
+  return (size & 0x1FF) | (variable ? 0x01 : 0) << 9 | (priority & 0x03) << 10 | (type & 0x03) << 13 | (shared ? 0x01 : 0) << 15;
+}
+
+// For LargeForwardOpen
+template<>
+inline EIP_DWORD ForwardOpenRequest_<EIP_DWORD>::calcConnectionParams(EIP_UINT size, bool variable, EIP_BYTE priority, EIP_BYTE type, bool shared)  {
+  return (size & 0x7FFFF) | (variable ? 0x01 : 0) << 25 | (priority & 0x03) << 26 | (type & 0x03) << 29 | (shared ? 0x01 : 0) << 31;
+}
+
+#ifdef EIP_LEGACY_FORWARD_OPEN
+#warning "Notice: Legacy ForwardOpenRequest implementing Large_Forward_Open is used. If you want to implement Forward_Open, undefine EIP_LEGACY_FORWARD_OPEN and rebuild the library."
+typedef ForwardOpenRequest_< EIP_DWORD > ForwardOpenRequest;
+#else
+#warning "Notice: ForwardOpenRequest now implements Forward_Open. If you want ForwardOpenRequest implementing Large_Forward_Open like older versions of odva_ethernetip, define EIP_LEGACY_FORWARD_OPEN and rebuild the library."
+typedef ForwardOpenRequest_< EIP_WORD > ForwardOpenRequest;
+#endif
+typedef ForwardOpenRequest_< EIP_DWORD > LargeForwardOpenRequest;
 
 } // namespace eip
 
